@@ -24,7 +24,7 @@
 #endif
 
 #include <dlfcn.h>
-#include <Promise/Promise.hpp>
+#include <EasyCpp.hpp>
 
 namespace Platform {
 
@@ -34,9 +34,6 @@ DEFINE_SYNC_PROMISE(DLib, CDynamicLibraryPtr);
 class CDynamicLibrary
 {
 public:
-	friend CSharedBase<CDynamicLibrary> *
-		AllocCreateSharedBase<CDynamicLibrary>(CVoidPointerWrapper &&);
-
 	static inline CDLibPromisePtr Create(const CConstStringPtr &path);
 
 	inline ~CDynamicLibrary(void);
@@ -44,6 +41,8 @@ public:
 	template <class Fn>
 	inline decltype(auto) GetFunc(const CConstStringPtr &funcName) const;
 
+	friend CDynamicLibraryPtr
+		MakeShared<CDynamicLibrary>(CVoidPointerWrapper &&);
 private:
 	inline CDynamicLibrary(CVoidPointerWrapper &&handle);
 
@@ -59,8 +58,7 @@ inline CDLibPromisePtr CDynamicLibrary::Create(const CConstStringPtr &path)
 		return CDLibPromisePtr();
 	} else {
 		DLIB_DEBUG("Library ", path, " is loaded");
-		return CDLibPromisePtr(CDynamicLibraryPtr(
-				AllocCreateSharedBase<CDynamicLibrary>(CVoidPointerWrapper(handle))));
+		return CDLibPromisePtr(MakeShared<CDynamicLibrary>(CVoidPointerWrapper(handle)));
 	}
 }
 
